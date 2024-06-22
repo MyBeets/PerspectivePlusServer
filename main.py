@@ -13,13 +13,14 @@ def annotate_captions(captionARR):
     temp = []
     idx = 0
     size = len(captionARR)
-    while captionARR:
+    while idx < size:
+        idx+=1
         if idx%TOKEN_SIZE == 0 || idx == size-1:
+            temp.append(idx)
             textARR.append(temp)
             temp = []
-        e = captionARR.pop(0)
+        e = captionARR.get(idx)
         temp.append(e)
-
     return str(textARR)
 
 def get_youtube_captions(video_id):
