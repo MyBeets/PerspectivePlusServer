@@ -20,7 +20,7 @@ def annotate_captions(captionARR):
             textSTR += timestamp
             timestamp = str(e['start'])
         textSTR += " " + e['text']
-    return textARR
+    return textSTR
 
 def get_youtube_captions(video_id):
     try:
