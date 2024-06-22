@@ -33,7 +33,7 @@ def captions():
     annotationTEXT = annotate_captions(captionTEXT)
 
 
-    return {"is_video": True, "message": annotationTEXT} #you have to return json here as explained in the js file
+    return {"is_video": True, "message": captionTEXT+annotationTEXT} #you have to return json here as explained in the js file
 
 
 if __name__ == "__main__":
