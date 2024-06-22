@@ -47,7 +47,7 @@ def captions():
     annotationTEXT = annotate_captions(captionARR)
 
 
-    return {"is_video": True, "message": annotationTEXT + "*****" + captionARR} #you have to return json here as explained in the js file
+    return {"is_video": True, "message": annotationTEXT + "*****" + str(captionARR)} #you have to return json here as explained in the js file
 
 
 if __name__ == "__main__":
