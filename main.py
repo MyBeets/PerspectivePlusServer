@@ -18,7 +18,6 @@ def annotate_captions(captionARR):
         idx+=1
         e = captionARR[idx]
         if idx%TOKEN_SIZE == 0 or idx == size-1:
-            temp timestamp 
             textDICT[timestamp] = temp
             temp = ""
             timestamp = float(e['start'])
