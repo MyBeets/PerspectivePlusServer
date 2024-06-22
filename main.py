@@ -18,7 +18,7 @@ def annotate_captions(captionARR):
         e = captionARR[idx]
         if idx%TOKEN_SIZE == 0 or idx == size-1:
             textSTR += timestamp
-            timestamp = e['start']
+            timestamp = str(e['start'])
         textSTR += " " + e['text']
     return textARR
 
