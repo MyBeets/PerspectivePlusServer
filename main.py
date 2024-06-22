@@ -19,7 +19,7 @@ def annotate_captions(captionARR):
             temp.append(idx)
             textARR.append(temp)
             temp = []
-        e = captionARR.get(idx)
+        e = captionARR[idx]
         temp.append(e)
     return str(textARR)
 
