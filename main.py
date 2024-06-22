@@ -5,6 +5,10 @@ from youtube_transcript_api import YouTubeTranscriptApi
 app = Flask(__name__)
 CORS(app)
 
+def annotationTEXT(captionTEXT):
+    textARR = captionTEXT.split('"start"')
+    return str(textARR)
+
 def get_youtube_captions(video_id):
     try:
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
@@ -26,7 +30,10 @@ def captions():
         return {"is_video": False, "message": 'Not watching a YouTube video'}
     videoID = videoURL.split('=')[1]
     captionTEXT = get_youtube_captions(videoID)
-    return {"is_video": True, "message": captionTEXT} #you have to return json here as explained in the js file
+    annotationTEXT = annotate_captions(captionTEXT)
+
+
+    return {"is_video": True, "message": annotationTEXT} #you have to return json here as explained in the js file
 
 
 if __name__ == "__main__":
