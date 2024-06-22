@@ -15,7 +15,7 @@ def annotate_captions(captionARR):
     size = len(captionARR)
     while idx < size:
         idx+=1
-        if idx%TOKEN_SIZE == 0 || idx == size-1:
+        if idx%TOKEN_SIZE == 0 or idx == size-1:
             temp.append(idx)
             textARR.append(temp)
             temp = []
