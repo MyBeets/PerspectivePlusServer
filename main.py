@@ -5,7 +5,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 app = Flask(__name__)
 CORS(app)
 
-def annotation_captions(captionTEXT):
+def annotate_captions(captionTEXT):
     textARR = captionTEXT.split('"start"')
     return str(textARR)
 
