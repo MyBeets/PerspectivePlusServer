@@ -12,7 +12,7 @@ def annotate_captions(captionARR):
     textSTR = ""
     idx = 0
     size = len(captionARR)
-    timestamp = 0 #a number
+    timestamp = "0" #a number
     while idx < size-1:
         idx+=1
         e = captionARR[idx]
