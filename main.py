@@ -9,20 +9,20 @@ CORS(app)
 TOKEN_SIZE = 5
 
 def annotate_captions(captionARR):
-    textARR = []
-    temp = []
+    textDICT = {}
+    temp = ""
     idx = 0
     size = len(captionARR)
-    timestamp = ""
+    timestamp = 0 #a number
     while idx < size-1:
         idx+=1
         e = captionARR[idx]
         if idx%TOKEN_SIZE == 0 or idx == size-1:
-            temp.append(timestamp)
-            textARR.append(temp)
-            temp = []
-            timestamp = e['start']
-        temp.append(e['text'])
+            temp timestamp 
+            textDICT[timestamp] = temp
+            temp = ""
+            timestamp = float(e['start'])
+        temp += e['text']
     return str(textARR)
 
 def get_youtube_captions(video_id):
