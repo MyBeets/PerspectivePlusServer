@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from flask_cors import CORS
 from youtube_transcript_api import YouTubeTranscriptApi
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -48,7 +49,7 @@ def captions():
     annotationTEXT = annotate_captions(captionARR)
 
 
-    return {"is_video": True, "message": str(annotationTEXT)} #you have to return json here as explained in the js file
+    return {"is_video": True, "message": json.dumps(annotationTEXT)} #you have to return json here as explained in the js file
 
 
 if __name__ == "__main__":
