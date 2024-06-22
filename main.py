@@ -7,7 +7,7 @@ app = Flask(__name__)
 CORS(app)
 
 #global static variables
-TOKEN_SIZE = 5
+TOKEN_SIZE = 5 #cuts into about 10 sec pieces
 
 def annotate_captions(captionARR):
     textARR = []
