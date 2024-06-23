@@ -1,7 +1,8 @@
+-f https://download.pytorch.org/whl/torch_stable.html
 flask
 flask-cors
 youtube-transcript-api
 transformers
-torch
+torch==1.11.0+cpu
 gunicorn
 pickle4
