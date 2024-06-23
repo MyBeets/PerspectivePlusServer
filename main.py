@@ -6,7 +6,7 @@ import pickle4 as pickle
 from transformers import AutoTokenizer, AutoModel
 import torch
 from sklearn.metrics.pairwise import cosine_similarity
-import heap
+import heapq
 
 tokenizer = AutoTokenizer.from_pretrained('allenai/scibert_scivocab_cased')
 model = AutoModel.from_pretrained('allenai/scibert_scivocab_cased')
