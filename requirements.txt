@@ -3,6 +3,6 @@ flask
 flask-cors
 youtube-transcript-api
 transformers
-torch==1.11.0+cpu
+torch==2.2.0+cpu
 gunicorn
 pickle4
