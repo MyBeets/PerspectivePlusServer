@@ -20,8 +20,8 @@ corp_embedding = pickle.load(open("embeddings.pkl", "rb"))
 corpus = pickle.load(open("corpus.pkl", "rb"))
 
 #global static variables
-TOKEN_SIZE = 5 #cuts into about 10 sec pieces
-THRESHOLD = 0 #0.65*1000
+TOKEN_SIZE = 2
+THRESHOLD = 0.65*1000
 
 def preprocess(sentences):
     inputs = tokenizer(sentences, return_tensors='pt', padding=True, truncation=True, max_length=512)
@@ -48,13 +48,13 @@ def process_captions(chunks):
         sent_embedding = get_embeddings(input_id, attention_mask)
 
         #get the top k from embedding space
-        results = sentence_transformers.util.semantic_search(sent_embedding, corp_embedding)
+        results = sentence_transformers.util.semantic_search(sent_embedding, corp_embedding, top_k = 3)
         if not results:
             output.append(element)
         else:
             temp = []
             for r in results[0]:
-                temp.append(corpus[r['corpus_id']] + str(r['score'])) 
+                temp.append(corpus[r['corpus_id']] + " " + str(r['score'])) 
             output.append([element[0], element[1], temp])
 
     return output
