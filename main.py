@@ -2,6 +2,17 @@ from flask import Flask, render_template, request
 from flask_cors import CORS
 from youtube_transcript_api import YouTubeTranscriptApi
 import json
+import pickle4 as pickle
+import sentence_transformers
+from transformers import *
+import torch
+
+tokenizer = AutoTokenizer.from_pretrained('allenai/scibert_scivocab_cased')
+model = AutoModel.from_pretrained('allenai/scibert_scivocab_cased')
+
+#depickling
+corp_embedding = pickle.load(open("embeddings.pkl", "rb"))
+corpus = pickle.load(open("corpus.pkl", "rb"))
 
 app = Flask(__name__)
 CORS(app)
@@ -9,7 +20,34 @@ CORS(app)
 #global static variables
 TOKEN_SIZE = 5 #cuts into about 10 sec pieces
 
-def annotate_captions(captionARR):
+def preprocess(sentences):
+    inputs = tokenizer(sentences, return_tensors='pt', padding=True, truncation=True, max_length=512)
+    return inputs['input_ids'], inputs['attention_mask']
+
+def get_embeddings(input_ids, attention_mask):
+    with torch.no_grad():
+        outputs = model(input_ids, attention_mask=attention_mask)
+        hidden_states = outputs.last_hidden_state
+        # Take the mean of the hidden states of the tokens (excluding special tokens like [CLS], [SEP])
+        embeddings = torch.mean(hidden_states, dim=1)
+    return embeddings
+
+
+def process_captions(chunks):
+    for element in chunks:
+        #get the embedding of element[1] ie the text component
+        input_id, attention_mask = preprocess(element[1], tokenizer)
+        sent_embedding = get_embeddings(input_id, attention_mask)
+
+        #get the top k from embedding space
+        results = sentence_transformers.util.semantic_search(sent_embedding, corp_embedding)[0]
+        for r in results:
+          print(corpus[r['corpus_id']] +" score: "+ str(r['score']) + "\n")
+        
+        element.append(results)
+
+
+def chunk_captions(captionARR):
     textARR = []
     temp = ""
     idx = 0
@@ -46,10 +84,10 @@ def captions():
         return {"is_video": False, "message": 'Not watching a YouTube video'}
     videoID = videoURL.split('=')[1]
     captionARR = get_youtube_captions(videoID)
-    annotationTEXT = annotate_captions(captionARR)
+    chunkARR = chunk_captions(captionARR)
 
 
-    return {"is_video": True, "message": json.dumps(annotationTEXT)} #you have to return json here as explained in the js file
+    return {"is_video": True, "message": json.dumps(chunkARR)} #you have to return json here as explained in the js file
 
 
 if __name__ == "__main__":

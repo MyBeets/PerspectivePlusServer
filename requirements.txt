@@ -1,6 +1,8 @@
 flask
 flask-cors
 youtube-transcript-api
-pymongo
+sentence-transformers
+transformers
+torch
 gunicorn
-numpy
+pickle4
