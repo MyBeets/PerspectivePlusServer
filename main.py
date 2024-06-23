@@ -8,6 +8,7 @@ import torch
 from sklearn.metrics.pairwise import cosine_similarity
 import heapq
 import sentence_transformers
+import pandas
 
 app = Flask(__name__)
 CORS(app)
@@ -17,7 +18,7 @@ model = AutoModel.from_pretrained('allenai/scibert_scivocab_uncased')
 
 #depickling
 corp_embedding = pickle.load(open("embeddings.pkl", "rb"))
-corpus = pickle.load(open("corpus.pkl", "rb"))
+corpus_df = pickle.load(open("corpus.pkl", "rb"))
 
 #global static variables
 TOKEN_SIZE = 2
@@ -48,13 +49,14 @@ def process_captions(chunks):
         sent_embedding = get_embeddings(input_id, attention_mask)
 
         #get the top k from embedding space
-        results = sentence_transformers.util.semantic_search(sent_embedding, corp_embedding, top_k = 3)
+        results = sentence_transformers.util.semantic_search(sent_embedding, corp_embedding, top_k = 1)
         if not results:
             output.append(element)
         else:
             temp = []
             for r in results[0]:
-                temp.append(corpus[r['corpus_id']] + " " + str(r['score'])) 
+                item = corpus_df.iloc[r['corpus_id']]
+                temp.append( item['claim'] + " " + item['label'] + " " + item['explanation'].encode('ascii', 'replace').decode() + " " + str(r['score'])) 
             output.append([element[0], element[1], temp])
 
     return output
@@ -99,7 +101,7 @@ def captions():
     captionARR = get_youtube_captions(videoID)
     chunkARR = chunk_captions(captionARR)
     response = process_captions(chunkARR)
-
+    print(response)
 
     return {"is_video": True, "message": json.dumps(response)} #you have to return json here as explained in the js file
 
