@@ -2,24 +2,26 @@ from flask import Flask, render_template, request
 from flask_cors import CORS
 from youtube_transcript_api import YouTubeTranscriptApi
 import json
-import pickle4 as pickle
+import pickle
 from transformers import AutoTokenizer, AutoModel
 import torch
 from sklearn.metrics.pairwise import cosine_similarity
 import heapq
+import sentence_transformers
 
-tokenizer = AutoTokenizer.from_pretrained('allenai/scibert_scivocab_cased')
-model = AutoModel.from_pretrained('allenai/scibert_scivocab_cased')
+app = Flask(__name__)
+CORS(app)
+
+tokenizer = AutoTokenizer.from_pretrained('allenai/scibert_scivocab_uncased')
+model = AutoModel.from_pretrained('allenai/scibert_scivocab_uncased')
 
 #depickling
 corp_embedding = pickle.load(open("embeddings.pkl", "rb"))
 corpus = pickle.load(open("corpus.pkl", "rb"))
 
-app = Flask(__name__)
-CORS(app)
-
 #global static variables
 TOKEN_SIZE = 5 #cuts into about 10 sec pieces
+THRESHOLD = 0 #0.65*1000
 
 def preprocess(sentences):
     inputs = tokenizer(sentences, return_tensors='pt', padding=True, truncation=True, max_length=512)
@@ -33,36 +35,29 @@ def get_embeddings(input_ids, attention_mask):
         embeddings = torch.mean(hidden_states, dim=1)
     return embeddings
 
-def semantic_search_jr(sentence_embed, corpus_embed, top_k = 10): #uses cosine similarity
-    heap = []
-    min_sim = 0
-    similarity_scores = compute_similarity(sentence_embed, corpus_embed)[0]
-    for x in range(len(similarity_scores)):
-        score = similarity_scores[x]
-        if  score > min_sim:
-            text = corpus[x]
-            heappush(heap, (score, text))
-            if len(heap) > top_k:
-                heappop(heap)
-    return heapsort(heap)
-
 
 def compute_similarity(embeddings1, embeddings2):
     return cosine_similarity(embeddings1, embeddings2)
 
 
 def process_captions(chunks):
+    output = []
     for element in chunks:
         #get the embedding of element[1] ie the text component
-        input_id, attention_mask = preprocess(element[1], tokenizer)
+        input_id, attention_mask = preprocess(element[1])
         sent_embedding = get_embeddings(input_id, attention_mask)
 
         #get the top k from embedding space
-        results = semantic_search_jr(sent_embedding, corp_embedding)[0]
-        for r in results:
-          print(corpus[r['corpus_id']] +" score: "+ str(r['score']) + "\n")
-        
-        element.append(results)
+        results = sentence_transformers.util.semantic_search(sent_embedding, corp_embedding)
+        if not results:
+            output.append(element)
+        else:
+            temp = []
+            for r in results[0]:
+                temp.append(corpus[r['corpus_id']] + str(r['score'])) 
+            output.append([element[0], element[1], temp])
+
+    return output
 
 
 def chunk_captions(captionARR):
@@ -103,9 +98,10 @@ def captions():
     videoID = videoURL.split('=')[1]
     captionARR = get_youtube_captions(videoID)
     chunkARR = chunk_captions(captionARR)
+    response = process_captions(chunkARR)
 
 
-    return {"is_video": True, "message": json.dumps(chunkARR)} #you have to return json here as explained in the js file
+    return {"is_video": True, "message": json.dumps(response)} #you have to return json here as explained in the js file
 
 
 if __name__ == "__main__":

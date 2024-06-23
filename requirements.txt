@@ -2,7 +2,8 @@
 flask
 flask-cors
 youtube-transcript-api
+sentence-transformers
 transformers
 torch==2.2.0+cpu
+scikit-learn
 gunicorn
-pickle4
