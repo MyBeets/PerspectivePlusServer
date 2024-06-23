@@ -3,9 +3,10 @@ from flask_cors import CORS
 from youtube_transcript_api import YouTubeTranscriptApi
 import json
 import pickle4 as pickle
-import sentence_transformers
-from transformers import *
+from transformers import AutoTokenizer, AutoModel
 import torch
+from sklearn.metrics.pairwise import cosine_similarity
+import heap
 
 tokenizer = AutoTokenizer.from_pretrained('allenai/scibert_scivocab_cased')
 model = AutoModel.from_pretrained('allenai/scibert_scivocab_cased')
@@ -32,6 +33,23 @@ def get_embeddings(input_ids, attention_mask):
         embeddings = torch.mean(hidden_states, dim=1)
     return embeddings
 
+def semantic_search_jr(sentence_embed, corpus_embed, top_k = 10): #uses cosine similarity
+    heap = []
+    min_sim = 0
+    similarity_scores = compute_similarity(sentence_embed, corpus_embed)[0]
+    for x in range(len(similarity_scores)):
+        score = similarity_scores[x]
+        if  score > min_sim:
+            text = corpus[x]
+            heappush(heap, (score, text))
+            if len(heap) > top_k:
+                heappop(heap)
+    return heapsort(heap)
+
+
+def compute_similarity(embeddings1, embeddings2):
+    return cosine_similarity(embeddings1, embeddings2)
+
 
 def process_captions(chunks):
     for element in chunks:
@@ -40,7 +58,7 @@ def process_captions(chunks):
         sent_embedding = get_embeddings(input_id, attention_mask)
 
         #get the top k from embedding space
-        results = sentence_transformers.util.semantic_search(sent_embedding, corp_embedding)[0]
+        results = semantic_search_jr(sent_embedding, corp_embedding)[0]
         for r in results:
           print(corpus[r['corpus_id']] +" score: "+ str(r['score']) + "\n")
         

@@ -1,7 +1,6 @@
 flask
 flask-cors
 youtube-transcript-api
-sentence-transformers
 transformers
 torch
 gunicorn
