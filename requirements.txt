@@ -8,3 +8,4 @@ torch==2.2.0+cpu
 pandas
 scikit-learn
 gunicorn
+0penai-api
